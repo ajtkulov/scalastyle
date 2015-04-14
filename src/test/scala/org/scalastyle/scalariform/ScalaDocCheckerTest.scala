@@ -295,4 +295,93 @@ class ScalaDocCheckerTest extends AssertionsForJUnit with CheckerTest {
     }
   }
 
+
+  @Test def test1(): Unit = {
+    val source =
+      """
+        |/**
+        | * Doc
+        | */
+        |object X {
+        |
+        |  /**
+        |   * Foo does some foos. With a
+        |   *
+        |   * ```
+        |   *     code example here
+        |   * ```
+        |   * and something or other else with ``code`` and (link)[to]
+        |   *
+        |   * @param a
+        |   *   Some text for parameter A
+        |   *   More for A
+        |   * @param b B
+        |   * @param c C
+        |   * @return some integer
+        |   */
+        |  def foo(a: Int, b: Int, c: Int): Int = a + b
+        |}
+      """.stripMargin
+
+    assertErrors(List(), source)
+  }
+
+  @Test def test2(): Unit = {
+    val source =
+      """package org.scalastyle.scalariform
+        |
+        |/**
+        | * Doc
+        | */
+        |object X {
+        |
+        |  /**
+        |   * Foo does some foos. With a
+        |   *
+        |   * ```
+        |   *     code example here
+        |   * ```
+        |   * and something or other else with ``code`` and (link)[to]
+        |   *
+        |   * @param a
+        |   *   Some text for parameter A
+        |   *   More for A
+        |   * @param b B
+        |   * @param c C
+        |   * @return some integer
+        |   */
+        |  def foo(a: Int, b: Int, c: Int): Int = a + b
+        |}
+      """.stripMargin
+
+    assertErrors(List(), source)
+  }
+
+  @Test def test3(): Unit = {
+    val source =
+      """package org.scalastyle.scalariform
+        |
+        |/**
+        | * Doc
+        | */
+        |object X {
+        |
+        |  /**
+        |   * Foo does some foos. With a
+        |   *
+        |   * ```
+        |   *     code example here
+        |   * ```
+        |   * and something or other else with ``code`` and (link)[to]
+        |   *
+        |   * @return some integer
+        |   */
+        |  def foo(): Int = 4
+        |}
+      """.stripMargin
+
+    assertErrors(List(), source)
+  }
+
+
 }
