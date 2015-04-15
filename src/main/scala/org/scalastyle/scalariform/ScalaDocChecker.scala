@@ -156,7 +156,7 @@ class ScalaDocChecker extends CombinedChecker {
    *
    * we do not bother descending down any further
    */
-  private def localVisit(skip: Boolean, fallback: HiddenTokens, lines: Lines)(ast: Any): List[ScalastyleError] = ast match {
+  def localVisit(skip: Boolean, fallback: HiddenTokens, lines: Lines)(ast: Any): List[ScalastyleError] = ast match {
     case t: FullDefOrDcl      =>
       // private, private[xxx];
       // protected, protected[xxx];
@@ -240,6 +240,8 @@ class ScalaDocChecker extends CombinedChecker {
 
     case t: Any          =>
       // anything else, we descend (unless we stopped above)
+//      println()
+//      println(t)
       visit(t, localVisit(skip, fallback, lines))
   }
 

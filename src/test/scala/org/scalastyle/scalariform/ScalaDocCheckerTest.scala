@@ -16,9 +16,14 @@
 
 package org.scalastyle.scalariform
 
+import org.scalastyle.{Checker, Line, Lines}
 import org.scalastyle.file.CheckerTest
 import org.scalatest.junit.AssertionsForJUnit
 import org.junit.Test
+
+import scalariform.lexer.{HiddenTokens, Tokens, Token}
+import scalariform.parser._
+import Tokens._
 
 // scalastyle:off magic.number multiple.string.literals
 
@@ -298,37 +303,42 @@ class ScalaDocCheckerTest extends AssertionsForJUnit with CheckerTest {
 
   @Test def test1(): Unit = {
     val source =
-      """
-        |/**
-        | * Doc
-        | */
-        |object X {
-        |
-        |  /**
-        |   * Foo does some foos. With a
-        |   *
-        |   * ```
-        |   *     code example here
-        |   * ```
-        |   * and something or other else with ``code`` and (link)[to]
-        |   *
-        |   * @param a
-        |   *   Some text for parameter A
-        |   *   More for A
-        |   * @param b B
-        |   * @param c C
-        |   * @return some integer
-        |   */
-        |  def foo(a: Int, b: Int, c: Int): Int = a + b
-        |}
-      """.stripMargin
+      test1Example.stripMargin
 
     assertErrors(List(), source)
+  }
+
+  def test1Example: String = {
+    """
+      |/**
+      | * Doc
+      |
+      |object X {
+      |
+      |  *
+      |   * Foo does some foos. With a
+      |   *
+      |   * ```
+      |   *     code example here
+      |   * ```
+      |   * and something or other else with ``code`` and (link)[to]
+      |   *
+      |   * @param a
+      |   *   Some text for parameter A
+      |   *   More for A
+      |   * @param b B
+      |   * @param c C
+      |   * @return some integer
+      |
+      |  def foo(a: Int, b: Int, c: Int): Int = a + b
+      |}
+    """
   }
 
   @Test def test2(): Unit = {
     val source =
       """package org.scalastyle.scalariform
+        |import org.scalastyle.scalariform
         |
         |/**
         | * Doc
@@ -383,5 +393,31 @@ class ScalaDocCheckerTest extends AssertionsForJUnit with CheckerTest {
     assertErrors(List(), source)
   }
 
+  @Test def test4(): Unit = {
+    val v2 = List(TmplDef(List(Token(OBJECT, "object",85, "object")),Token(VARID,"X",92,"X"),None,List(),None,None,None,
+      Some(TemplateBody(None,Token(LBRACE,"{",94,"{"),StatSeq(None,Some(FullDefOrDcl(List(),List(),FunDefOrDcl(Token(DEF,"def",383,"def"),Token(VARID,"foo",387,"foo"),None,
+        ParamClauses(None,List((ParamClause(Token(LPAREN,"(",390,"("),None,Some(Param(List(),List(),None,Token(VARID,"a",391,"a"),
+          Some((Token(COLON,":",392,":"),Type(List(Type(List(GeneralTokens(List(Token(VARID,"Int",394,"Int"))))))))),None)),List((Token(COMMA,",",397,","),Param(List(),List(),None,
+          Token(VARID,"b",399,"b"),Some((Token(COLON,":",400,":"),Type(List(Type(List(GeneralTokens(List(Token(VARID,"Int",402,"Int"))))))))),None)),
+          (Token(COMMA,",",405,","),Param(List(),List(),None,Token(VARID,"c",407,"c"),Some((Token(COLON,":",408,":"),Type(List(Type(List(GeneralTokens(List(Token(VARID,"Int",410,"Int"))))))))),None))),
+          Token(RPAREN,")",413,")")),None))),Some((Token(COLON,":",414,":"),Type(List(GeneralTokens(List(Token(VARID,"Int",416,"Int"))))))),Some(ExprFunBody(Token(EQUALS,"=",420,"="),None,
+          Expr(List(InfixExpr(List(CallExpr(None,Token(VARID,"a",422,"a"),None,List(),None)),Token(PLUS,"+",424,"+"),None,List(CallExpr(None,Token(VARID,"b",426,"b"),None,List(),None))))))),false))),List()),Token(RBRACE,"}",428,"}")))))
+
+
+
+    val v1 = List(TmplDef(List(Token(OBJECT,"object",16,"object")),Token(VARID,"X",23,"X"),None,List(),None,None,None,Some(TemplateBody(None,Token(LBRACE,"{",25,"{"),
+      StatSeq(None,Some(FullDefOrDcl(List(),List(),FunDefOrDcl(Token(DEF,"def",314,"def"),Token(VARID,"foo",318,"foo"),None,
+        ParamClauses(None,List((ParamClause(Token(LPAREN,"(",321,"("),None,Some(Param(List(),List(),None,Token(VARID,"a",322,"a"),Some((Token(COLON,":",323,":"),
+          Type(List(Type(List(GeneralTokens(List(Token(VARID,"Int",325,"Int"))))))))),None)),List((Token(COMMA,",",328,","),Param(List(),List(),None,Token(VARID,"b",330,"b"),
+          Some((Token(COLON,":",331,":"),Type(List(Type(List(GeneralTokens(List(Token(VARID,"Int",333,"Int"))))))))),None)), (Token(COMMA,",",336,","),
+          Param(List(),List(),None,Token(VARID,"c",338,"c"),Some((Token(COLON,":",339,":"),Type(List(Type(List(GeneralTokens(List(Token(VARID,"Int",341,"Int"))))))))),None))),
+          Token(RPAREN,")",344,")")),None))),Some((Token(COLON,":",345,":"),Type(List(GeneralTokens(List(Token(VARID,"Int",347,"Int"))))))),Some(ExprFunBody(Token(EQUALS,"=",351,"="),
+          None,Expr(List(InfixExpr(List(CallExpr(None,Token(VARID,"a",353,"a"),None,List(),None)),Token(PLUS,"+",355,"+"),None,List(CallExpr(None,Token(VARID,"b",357,"b"),None,List(),None))))))),false))),List()),
+      Token(RBRACE,"}",359,"}")))))
+
+
+    val q = new ScalaDocChecker()
+    q.localVisit(skip = false, HiddenTokens(Nil), Checker.parseLines(test1Example))(v1)
+  }
 
 }
